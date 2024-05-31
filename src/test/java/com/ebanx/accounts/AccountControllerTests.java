@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -52,7 +53,7 @@ public class AccountControllerTests {
         String accountId = "1234";
         float accountBalance = 123.456f;
         AccountEntity accountEntity = new AccountEntity(accountId, accountBalance);
-        when(accountRepository.getAccountById(accountId)).thenReturn(accountEntity);
+        when(accountRepository.getAccountById(accountId)).thenReturn(Optional.of(accountEntity));
 
         ResponseEntity<Float> response = accountController.getAccountBalance(accountId);
         assertEquals("Status should be 200 OK", HttpStatus.OK, response.getStatusCode());
@@ -108,5 +109,32 @@ public class AccountControllerTests {
         ResponseEntity<Float> getResponse = accountController.getAccountBalance(accountId);
         assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, getResponse.getStatusCode());
         assertEquals("Response body should be 0.0f", 0.0f, getResponse.getBody());
+    }
+
+    @Test
+    void depositToAccountTest() {
+        String accountId = "1234";
+        float accountBalance = 123.456f, offsetBalance = 20.f;
+        AccountEntity accountEntity = new AccountEntity(accountId, accountBalance);
+        when(accountRepository.getAccountById(accountId)).thenReturn(Optional.of(accountEntity));
+
+        ResponseEntity<Float> balanceResponse = accountController.getAccountBalance(accountId);
+        assertEquals("Response body should be the actual account balance", accountBalance,
+                balanceResponse.getBody());
+
+        AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.DEPOSIT, offsetBalance, accountId);
+        ResponseEntity<AccountResponseDto> depositResponse = accountController.handleAccountEvent(accountRequest);
+        AccountResponseDto accountResponse = depositResponse.getBody();
+
+        assertEquals("Status should be 201 CREATED", HttpStatus.CREATED, depositResponse.getStatusCode());
+        assertNotNull("Response body shouldn't be null", accountResponse);
+        assertEquals("Response body should contain account id", accountId,
+                Objects.requireNonNull(accountResponse).getDestination().getId());
+        assertEquals("Wrong account balance", accountBalance + offsetBalance,
+                accountResponse.getDestination().getBalance());
+
+        balanceResponse = accountController.getAccountBalance(accountId);
+        assertEquals("Response body should be the actual account balance",
+                accountBalance + offsetBalance, balanceResponse.getBody());
     }
 }
