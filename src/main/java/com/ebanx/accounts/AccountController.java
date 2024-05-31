@@ -1,9 +1,9 @@
 package com.ebanx.accounts;
 
-import com.ebanx.accounts.dtos.AccountEventType;
 import com.ebanx.accounts.dtos.AccountRequestDto;
 import com.ebanx.accounts.dtos.AccountResponseDto;
 import com.ebanx.accounts.exceptions.AccountNotFoundException;
+import com.ebanx.accounts.exceptions.AccountWithLowerBalanceException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +32,24 @@ public class AccountController {
     }
 
     @RequestMapping(value="event", method = RequestMethod.POST)
-    public ResponseEntity<AccountResponseDto> handleAccountEvent(@Valid
+    public ResponseEntity<?> handleAccountEvent(@Valid
                                                                      @RequestBody AccountRequestDto accountRequestDto){
         if(accountRequestDto.validDepositRequest()) {
             AccountResponseDto responseBody =  accountService.depositToAccount(accountRequestDto);
             return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
         }
 
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        if(accountRequestDto.validWithdrawRequest()) {
+            try {
+                AccountResponseDto responseBody = accountService.withdrawFromAccount(accountRequestDto);
+                return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
+            } catch (AccountNotFoundException e ) {
+                return new ResponseEntity<>(0.0f, HttpStatus.NOT_FOUND);
+            } catch (AccountWithLowerBalanceException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

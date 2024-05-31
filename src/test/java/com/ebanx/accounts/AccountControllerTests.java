@@ -76,8 +76,8 @@ public class AccountControllerTests {
 
         AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.DEPOSIT, accountBalance, accountId);
 
-        ResponseEntity<AccountResponseDto> response = accountController.handleAccountEvent(accountRequest);
-        AccountResponseDto accountResponse = response.getBody();
+        ResponseEntity<?> response = accountController.handleAccountEvent(accountRequest);
+        AccountResponseDto accountResponse = (AccountResponseDto) response.getBody();
 
         assertEquals("Status should be 201 CREATED", HttpStatus.CREATED, response.getStatusCode());
         assertNotNull("Response body shouldn't be null", accountResponse);
@@ -122,8 +122,8 @@ public class AccountControllerTests {
                 balanceResponse.getBody());
 
         AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.DEPOSIT, offsetBalance, accountId);
-        ResponseEntity<AccountResponseDto> depositResponse = accountController.handleAccountEvent(accountRequest);
-        AccountResponseDto accountResponse = depositResponse.getBody();
+        ResponseEntity<?> depositResponse = accountController.handleAccountEvent(accountRequest);
+        AccountResponseDto accountResponse = (AccountResponseDto) depositResponse.getBody();
 
         assertEquals("Status should be 201 CREATED", HttpStatus.CREATED, depositResponse.getStatusCode());
         assertNotNull("Response body shouldn't be null", accountResponse);

@@ -45,7 +45,15 @@ public class AccountRequestDto {
         return destination;
     }
 
+    public String getOrigin() {
+        return origin;
+    }
+
     public boolean validDepositRequest() {
         return eventType.equals(AccountEventType.DEPOSIT) && destination!= null && !destination.isEmpty();
+    }
+
+    public boolean validWithdrawRequest() {
+        return eventType.equals(AccountEventType.WITHDRAW) && origin!= null && !origin.isEmpty();
     }
 }
