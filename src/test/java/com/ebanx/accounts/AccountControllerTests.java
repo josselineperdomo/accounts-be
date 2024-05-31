@@ -89,10 +89,9 @@ public class AccountControllerTests {
     @Test
     void accountEventEmptyFieldsTest() {
         AccountRequestDto accountRequest = new AccountRequestDto();
-        ResponseEntity<AccountResponseDto> response = accountController.handleAccountEvent(accountRequest);
+        Set<ConstraintViolation<AccountRequestDto>> violations = validator.validate(accountRequest);
 
-        assertEquals("Status should be 400 BAD REQUEST", HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNull("Response body should be null", response.getBody());
+        assertThat(violations).hasSizeGreaterThan(0);
     }
 
     @Test

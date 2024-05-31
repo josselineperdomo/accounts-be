@@ -34,7 +34,7 @@ public class AccountController {
     @RequestMapping(value="event", method = RequestMethod.POST)
     public ResponseEntity<AccountResponseDto> handleAccountEvent(@Valid
                                                                      @RequestBody AccountRequestDto accountRequestDto){
-        if(accountRequestDto.getEventType() == AccountEventType.DEPOSIT) {
+        if(accountRequestDto.validDepositRequest()) {
             AccountResponseDto responseBody =  accountService.depositToAccount(accountRequestDto);
             return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
         }

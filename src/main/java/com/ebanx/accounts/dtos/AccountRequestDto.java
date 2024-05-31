@@ -44,4 +44,8 @@ public class AccountRequestDto {
     public String getDestination() {
         return destination;
     }
+
+    public boolean validDepositRequest() {
+        return eventType.equals(AccountEventType.DEPOSIT) && destination!= null && !destination.isEmpty();
+    }
 }
