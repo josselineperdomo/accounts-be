@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class AccountRepository {
@@ -14,8 +15,8 @@ public class AccountRepository {
         this.accounts = new HashMap<>();
     }
 
-    public AccountEntity getAccountById(String id) {
-        return accounts.get(id);
+    public Optional<AccountEntity> getAccountById(String id) {
+        return Optional.ofNullable(accounts.get(id));
     }
 
     public void putAccount(AccountEntity account) {

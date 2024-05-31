@@ -3,12 +3,10 @@ package com.ebanx.accounts;
 import com.ebanx.accounts.dtos.AccountEventType;
 import com.ebanx.accounts.dtos.AccountRequestDto;
 import com.ebanx.accounts.dtos.AccountResponseDto;
-import com.ebanx.accounts.exceptions.AccountAlreadyExistsException;
 import com.ebanx.accounts.exceptions.AccountNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,12 +35,8 @@ public class AccountController {
     public ResponseEntity<AccountResponseDto> handleAccountEvent(@Valid
                                                                      @RequestBody AccountRequestDto accountRequestDto){
         if(accountRequestDto.getType() == AccountEventType.DEPOSIT) {
-            try {
-                AccountResponseDto responseBody =  accountService.insertAccount(accountRequestDto);
-                return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
-            } catch (AccountAlreadyExistsException e) {
-                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-            }
+            AccountResponseDto responseBody =  accountService.depositToAccount(accountRequestDto);
+            return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
         }
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }

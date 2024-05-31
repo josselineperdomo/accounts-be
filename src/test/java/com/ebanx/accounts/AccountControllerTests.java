@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -52,7 +53,7 @@ public class AccountControllerTests {
         String accountId = "1234";
         float accountBalance = 123.456f;
         AccountEntity accountEntity = new AccountEntity(accountId, accountBalance);
-        when(accountRepository.getAccountById(accountId)).thenReturn(accountEntity);
+        when(accountRepository.getAccountById(accountId)).thenReturn(Optional.of(accountEntity));
 
         ResponseEntity<Float> response = accountController.getAccountBalance(accountId);
         assertEquals("Status should be 200 OK", HttpStatus.OK, response.getStatusCode());
