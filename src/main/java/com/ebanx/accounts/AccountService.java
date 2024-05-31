@@ -37,6 +37,6 @@ public class AccountService {
                 .orElseGet(() -> AccountMapper.toEntity(accountRequest));
 
         accountRepository.putAccount(accountEntity);
-        return AccountMapper.toResponseDto(AccountMapper.toDto(accountEntity));
+        return AccountMapper.toResponseDto(AccountMapper.toDto(accountEntity), accountRequest.getEventType());
     }
 }

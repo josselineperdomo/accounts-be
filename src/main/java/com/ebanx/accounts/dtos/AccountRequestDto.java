@@ -1,29 +1,40 @@
 package com.ebanx.accounts.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public class AccountRequestDto {
     @NotNull
-    private AccountEventType type;
+    @JsonProperty("type")
+    private AccountEventType eventType;
     @NotNull
     @DecimalMin("0.01")
     private Float amount;
-    @NotNull
-    @NotEmpty
+
     private String destination;
+
+    private String origin;
 
     public AccountRequestDto() {}
 
-    public AccountRequestDto(AccountEventType type, Float amount, String destination) {
-        this.type = type;
+    public AccountRequestDto(AccountEventType type, Float amount, String accountId) {
+        this.eventType = type;
         this.amount = amount;
-        this.destination = destination;
+
+        if(this.eventType == AccountEventType.DEPOSIT) {
+            this.destination = accountId;
+            this.origin = null;
+        }
+
+        if(this.eventType == AccountEventType.WITHDRAW) {
+            this.destination = null;
+            this.origin = accountId;
+        }
     }
 
-    public AccountEventType getType() {
-        return type;
+    public AccountEventType getEventType() {
+        return eventType;
     }
 
     public float getAmount() {
