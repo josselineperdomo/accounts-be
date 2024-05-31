@@ -17,4 +17,8 @@ public class AccountRepository {
     public AccountEntity getAccountById(String id) {
         return accounts.get(id);
     }
+
+    public void putAccount(AccountEntity account) {
+        accounts.put(account.getAccountId(), account);
+    }
 }
