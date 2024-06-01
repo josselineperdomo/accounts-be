@@ -24,7 +24,10 @@ cd accounts-be
 ### Project Structure
 
 - `src/main/java/com/ebanx/accounts/` - Main application source code.
-- `src/main/resources/` - Configuration files.
+- `src/main/java/com/ebanx/accounts/AccountController.java` - HTTP layer of the API
+- `src/main/java/com/ebanx/accounts/AccountService.java` - Business logic of the API
+- `src/main/java/com/ebanx/accounts/AccountRepository.java` - Persistence layer of the API, for the purpose of the task, it is a `Map`
+- `src/main/java/com/ebanx/accounts/dtos/` - Objects to interact between Input, Controller and Service layers.
 - `src/test/java/com/ebanx/accounts/` - Unit tests.
 - `build.gradle.kts` - Gradle build script.
 - `gradlew` and `gradlew.bat` - Gradle wrapper scripts for Unix and Windows.
