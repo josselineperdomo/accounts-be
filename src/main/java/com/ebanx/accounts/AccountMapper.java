@@ -24,16 +24,16 @@ public class AccountMapper {
         return accountResponse;
     }
 
-    public static AccountResponseDto toResponseDto(AccountDto originAccountDto, AccountDto destAccountDto){
-        return new AccountResponseDto(originAccountDto, destAccountDto);
-    }
-
     public static AccountResponseDto toResponseDto(AccountEntity originAccountEntity, AccountEntity destAccountEntity){
         return new AccountResponseDto(toDto(originAccountEntity), toDto(destAccountEntity));
     }
 
-    public static AccountEntity toEntity(AccountRequestDto accountDto){
-        String accountId = Optional.ofNullable(accountDto.getDestination()).orElse(accountDto.getOrigin());
-        return new AccountEntity(accountId, accountDto.getAmount());
+    public static AccountEntity toEntity(AccountRequestDto accountRequestDto){
+        String accountId = Optional.ofNullable(accountRequestDto.getDestination()).orElse(accountRequestDto.getOrigin());
+        return new AccountEntity(accountId, accountRequestDto.getAmount());
+    }
+
+    public static AccountEntity toEntity(AccountDto accountDto){
+        return new AccountEntity(accountDto.getId(), accountDto.getBalance());
     }
 }
