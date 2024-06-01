@@ -19,6 +19,14 @@ public class AccountRepository {
         return Optional.ofNullable(accounts.get(id));
     }
 
+    public void emptyDatabase() {
+        accounts.clear();
+    }
+
+    public int getSize() {
+        return accounts.size();
+    }
+
     public void putAccount(AccountEntity account) {
         accounts.put(account.getAccountId(), account);
     }

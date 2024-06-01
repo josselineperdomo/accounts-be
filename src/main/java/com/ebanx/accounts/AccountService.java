@@ -20,6 +20,10 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
+    public void resetDatabase() {
+        accountRepository.emptyDatabase();
+    }
+
     public Float getAccountBalance(String accountId) {
         return accountRepository.getAccountById(accountId)
                 .map(AccountEntity::getBalance)

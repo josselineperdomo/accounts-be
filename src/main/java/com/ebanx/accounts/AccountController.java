@@ -63,4 +63,10 @@ public class AccountController {
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    @RequestMapping(value="reset", method = RequestMethod.POST)
+    public ResponseEntity<?> resetDatabase(){
+        accountService.resetDatabase();
+        return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
 }
