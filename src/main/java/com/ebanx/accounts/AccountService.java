@@ -1,5 +1,6 @@
 package com.ebanx.accounts;
 
+import com.ebanx.accounts.dtos.AccountDto;
 import com.ebanx.accounts.dtos.AccountRequestDto;
 import com.ebanx.accounts.dtos.AccountResponseDto;
 import com.ebanx.accounts.exceptions.AccountNotFoundException;
@@ -70,15 +71,20 @@ public class AccountService {
         Optional<AccountEntity> originAccountGetQuery = accountRepository.getAccountById(originAccountId);
         Optional<AccountEntity> destAccountGetQuery = accountRepository.getAccountById(destAccountId);
 
-        if(originAccountGetQuery.isPresent() && destAccountGetQuery.isPresent()) {
+        if(originAccountGetQuery.isPresent()) {
             AccountEntity originAccountEntity = originAccountGetQuery.get();
-            AccountEntity destAccountEntity = destAccountGetQuery.get();
 
             if(originAccountEntity.getBalance() < accountRequest.getAmount()) {
                 throw new AccountWithLowerBalanceException();
             }
             originAccountEntity.setBalance(originAccountEntity.getBalance() - accountRequest.getAmount());
-            destAccountEntity.setBalance(destAccountEntity.getBalance() + accountRequest.getAmount());
+            AccountEntity destAccountEntity = destAccountGetQuery
+                    .map(account -> {
+                        account.setBalance(account.getBalance() + accountRequest.getAmount());
+                        return account;
+                    })
+                    .orElseGet(() -> AccountMapper.toEntity(new AccountDto(destAccountId, accountRequest.getAmount())));
+
             accountRepository.putAccount(originAccountEntity);
             accountRepository.putAccount(destAccountEntity);
             return AccountMapper.toResponseDto(originAccountEntity, destAccountEntity);

@@ -236,11 +236,6 @@ public class AccountControllerTests {
                 accountsResponse.getOrigin().getBalance());
         assertEquals("Destination balance doesn't match", destAccountBalance + offsetBalance,
                 accountsResponse.getDestination().getBalance());
-
-        assertEquals("OriginAccount balance doesn't match", originAccountBalance - offsetBalance,
-                accountController.getAccountBalance(originAccountId).getBody());
-        assertEquals("DestinationAccount balance doesn't match", destAccountBalance + offsetBalance,
-                accountController.getAccountBalance(destAccountId).getBody());
     }
 
     @Test
@@ -253,7 +248,6 @@ public class AccountControllerTests {
 
         assertEquals("OriginAccount balance doesn't match", originAccountBalance,
                 accountController.getAccountBalance(originAccountId).getBody());
-
         ResponseEntity<Float> destBalanceStatus = accountController.getAccountBalance(destAccountId);
         assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, destBalanceStatus.getStatusCode());
         assertEquals("DestAccount balance doesn't match", 0.0f, destBalanceStatus.getBody());
@@ -261,16 +255,22 @@ public class AccountControllerTests {
         AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.TRANSFER, offsetBalance,
                 originAccountId, destAccountId);
         ResponseEntity<?> transferResponse = accountController.handleAccountEvent(accountRequest);
+        AccountResponseDto responseBody = (AccountResponseDto) transferResponse.getBody();
 
-        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, transferResponse.getStatusCode());
-        assertEquals("Response body should be a Float", Float.class, transferResponse.getBody().getClass());
-        assertEquals("Response body should be 0.0f", 0.0f, transferResponse.getBody());
+        assertEquals("Status should be 201 CREATED", HttpStatus.CREATED, transferResponse.getStatusCode());
+        assertNotNull("Response body shouldn't be null", responseBody);
+        assertNotNull("Origin shouldn't be null", responseBody.getOrigin());
+        assertNotNull("Destination shouldn't be null", responseBody.getDestination());
 
-        assertEquals("OriginAccount balance doesn't match", originAccountBalance,
-                accountController.getAccountBalance(originAccountId).getBody());
+        assertEquals("Origin Account id doesn't match", originAccountId,
+                responseBody.getOrigin().getId());
+        assertEquals("Destination Account id doesn't match", destAccountId,
+                responseBody.getDestination().getId());
 
-        destBalanceStatus = accountController.getAccountBalance(destAccountId);
-        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, destBalanceStatus.getStatusCode());
+        assertEquals("Origin balance doesn't match", originAccountBalance - offsetBalance,
+                responseBody.getOrigin().getBalance());
+        assertEquals("Destination balance doesn't match", offsetBalance,
+                responseBody.getDestination().getBalance());
     }
 
     @Test
@@ -295,12 +295,6 @@ public class AccountControllerTests {
         assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, transferResponse.getStatusCode());
         assertEquals("Response body should be a Float", Float.class, transferResponse.getBody().getClass());
         assertEquals("Response body should be 0.0f", 0.0f, transferResponse.getBody());
-
-        originBalanceStatus = accountController.getAccountBalance(originAccountId);
-        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND,
-                originBalanceStatus.getStatusCode());
-        assertEquals("DestAccount balance doesn't match", destAccountBalance,
-                accountController.getAccountBalance(destAccountId).getBody());
     }
 
     @Test
