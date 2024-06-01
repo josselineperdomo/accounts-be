@@ -18,6 +18,13 @@ public class AccountRequestDto {
 
     public AccountRequestDto() {}
 
+    public AccountRequestDto(AccountEventType eventType, Float amount, String origin, String destination) {
+        this.eventType = eventType;
+        this.amount = amount;
+        this.destination = destination;
+        this.origin = origin;
+    }
+
     public AccountRequestDto(AccountEventType type, Float amount, String accountId) {
         this.eventType = type;
         this.amount = amount;
@@ -55,5 +62,10 @@ public class AccountRequestDto {
 
     public boolean validWithdrawRequest() {
         return eventType.equals(AccountEventType.WITHDRAW) && origin!= null && !origin.isEmpty();
+    }
+
+    public boolean validTransferRequest() {
+        return eventType.equals(AccountEventType.TRANSFER) && origin!= null && !origin.isEmpty() && destination!= null
+                && !destination.isEmpty();
     }
 }

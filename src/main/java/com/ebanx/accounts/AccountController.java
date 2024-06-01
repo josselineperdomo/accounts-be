@@ -50,6 +50,17 @@ public class AccountController {
             }
         }
 
+        if(accountRequestDto.validTransferRequest()) {
+            try {
+                AccountResponseDto responseBody = accountService.transferBetweenAccount(accountRequestDto);
+                return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
+            } catch (AccountNotFoundException e ) {
+                return new ResponseEntity<>(0.0f, HttpStatus.NOT_FOUND);
+            } catch (AccountWithLowerBalanceException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

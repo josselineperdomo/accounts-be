@@ -201,4 +201,134 @@ public class AccountControllerTests {
         assertEquals("Response body should be the actual account balance",
                 accountBalance, balanceResponse.getBody());
     }
+
+    @Test
+    void transferBetweenAccountsTest() {
+        String originAccountId = "1234", destAccountId = "5678";
+        float originAccountBalance = 123.456f, destAccountBalance = 50.0f, offsetBalance = 23.456f;
+
+        when(accountRepository.getAccountById(originAccountId)).thenReturn(
+                Optional.of(new AccountEntity(originAccountId, originAccountBalance)));
+        when(accountRepository.getAccountById(destAccountId)).thenReturn(
+                Optional.of(new AccountEntity(destAccountId, destAccountBalance)));
+
+        assertEquals("OriginAccount balance doesn't match", originAccountBalance,
+                accountController.getAccountBalance(originAccountId).getBody());
+        assertEquals("DestinationAccount balance doesn't match", destAccountBalance,
+                accountController.getAccountBalance(destAccountId).getBody());
+
+        AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.TRANSFER, offsetBalance,
+                originAccountId, destAccountId);
+        ResponseEntity<?> transferResponse = accountController.handleAccountEvent(accountRequest);
+        AccountResponseDto accountsResponse = (AccountResponseDto) transferResponse.getBody();
+
+        assertEquals("Status should be 201 CREATED", HttpStatus.CREATED, transferResponse.getStatusCode());
+        assertNotNull("Response body shouldn't be null", accountsResponse);
+        assertNotNull("Origin shouldn't be null", accountsResponse.getOrigin());
+        assertNotNull("Destination shouldn't be null", accountsResponse.getDestination());
+
+        assertEquals("Origin Account id doesn't match", originAccountId,
+                accountsResponse.getOrigin().getId());
+        assertEquals("Destination Account id doesn't match", destAccountId,
+                accountsResponse.getDestination().getId());
+
+        assertEquals("Origin balance doesn't match", originAccountBalance - offsetBalance,
+                accountsResponse.getOrigin().getBalance());
+        assertEquals("Destination balance doesn't match", destAccountBalance + offsetBalance,
+                accountsResponse.getDestination().getBalance());
+
+        assertEquals("OriginAccount balance doesn't match", originAccountBalance - offsetBalance,
+                accountController.getAccountBalance(originAccountId).getBody());
+        assertEquals("DestinationAccount balance doesn't match", destAccountBalance + offsetBalance,
+                accountController.getAccountBalance(destAccountId).getBody());
+    }
+
+    @Test
+    void transferBetweenAccountsDestinationDoesntExistTest() {
+        String originAccountId = "1234", destAccountId = "5678";
+        float originAccountBalance = 123.456f, offsetBalance = 23.456f;
+
+        when(accountRepository.getAccountById(originAccountId)).thenReturn(
+                Optional.of(new AccountEntity(originAccountId, originAccountBalance)));
+
+        assertEquals("OriginAccount balance doesn't match", originAccountBalance,
+                accountController.getAccountBalance(originAccountId).getBody());
+
+        ResponseEntity<Float> destBalanceStatus = accountController.getAccountBalance(destAccountId);
+        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, destBalanceStatus.getStatusCode());
+        assertEquals("DestAccount balance doesn't match", 0.0f, destBalanceStatus.getBody());
+
+        AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.TRANSFER, offsetBalance,
+                originAccountId, destAccountId);
+        ResponseEntity<?> transferResponse = accountController.handleAccountEvent(accountRequest);
+
+        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, transferResponse.getStatusCode());
+        assertEquals("Response body should be a Float", Float.class, transferResponse.getBody().getClass());
+        assertEquals("Response body should be 0.0f", 0.0f, transferResponse.getBody());
+
+        assertEquals("OriginAccount balance doesn't match", originAccountBalance,
+                accountController.getAccountBalance(originAccountId).getBody());
+
+        destBalanceStatus = accountController.getAccountBalance(destAccountId);
+        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, destBalanceStatus.getStatusCode());
+    }
+
+    @Test
+    void transferBetweenAccountsOriginDoesntExistTest() {
+        String originAccountId = "1234", destAccountId = "5678";
+        float destAccountBalance = 123.456f, offsetBalance = 23.456f;
+
+        when(accountRepository.getAccountById(destAccountId)).thenReturn(
+                Optional.of(new AccountEntity(destAccountId, destAccountBalance)));
+
+        ResponseEntity<Float> originBalanceStatus = accountController.getAccountBalance(originAccountId);
+        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, originBalanceStatus.getStatusCode());
+        assertEquals("OriginAccount balance doesn't match", 0.0f, originBalanceStatus.getBody());
+
+        assertEquals("DestAccount balance doesn't match", destAccountBalance,
+                accountController.getAccountBalance(destAccountId).getBody());
+
+        AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.TRANSFER, offsetBalance,
+                originAccountId, destAccountId);
+        ResponseEntity<?> transferResponse = accountController.handleAccountEvent(accountRequest);
+
+        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND, transferResponse.getStatusCode());
+        assertEquals("Response body should be a Float", Float.class, transferResponse.getBody().getClass());
+        assertEquals("Response body should be 0.0f", 0.0f, transferResponse.getBody());
+
+        originBalanceStatus = accountController.getAccountBalance(originAccountId);
+        assertEquals("Status should be 404 NOT FOUND", HttpStatus.NOT_FOUND,
+                originBalanceStatus.getStatusCode());
+        assertEquals("DestAccount balance doesn't match", destAccountBalance,
+                accountController.getAccountBalance(destAccountId).getBody());
+    }
+
+    @Test
+    void transferBetweenAccountsWrongOffsetTest() {
+        String originAccountId = "1234", destAccountId = "5678";
+        float originAccountBalance = 123.456f, destAccountBalance = 50.0f, offsetBalance = 2300.456f;
+
+        when(accountRepository.getAccountById(originAccountId)).thenReturn(
+                Optional.of(new AccountEntity(originAccountId, originAccountBalance)));
+        when(accountRepository.getAccountById(destAccountId)).thenReturn(
+                Optional.of(new AccountEntity(destAccountId, destAccountBalance)));
+
+        assertEquals("OriginAccount balance doesn't match", originAccountBalance,
+                accountController.getAccountBalance(originAccountId).getBody());
+        assertEquals("DestAccount balance doesn't match", destAccountBalance,
+                accountController.getAccountBalance(destAccountId).getBody());
+
+        AccountRequestDto accountRequest = new AccountRequestDto(AccountEventType.TRANSFER, offsetBalance,
+                originAccountId, destAccountId);
+        ResponseEntity<?> transferResponse = accountController.handleAccountEvent(accountRequest);
+
+        assertEquals("Status should be 400 BAD REQUEST", HttpStatus.BAD_REQUEST,
+                transferResponse.getStatusCode());
+        assertNull("Response body should be null", transferResponse.getBody());
+
+        assertEquals("OriginAccount balance doesn't match", originAccountBalance,
+                accountController.getAccountBalance(originAccountId).getBody());
+        assertEquals("DestAccount balance doesn't match", destAccountBalance,
+                accountController.getAccountBalance(destAccountId).getBody());
+    }
 }
