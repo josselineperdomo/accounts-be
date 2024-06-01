@@ -56,4 +56,9 @@ public class AccountRequestDto {
     public boolean validWithdrawRequest() {
         return eventType.equals(AccountEventType.WITHDRAW) && origin!= null && !origin.isEmpty();
     }
+
+    public boolean validTransferRequest() {
+        return eventType.equals(AccountEventType.TRANSFER) && origin!= null && !origin.isEmpty() && destination!= null
+                && !destination.isEmpty();
+    }
 }

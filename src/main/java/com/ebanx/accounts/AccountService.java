@@ -58,4 +58,28 @@ public class AccountService {
         accountRepository.putAccount(accountEntity);
         return AccountMapper.toResponseDto(AccountMapper.toDto(accountEntity), accountRequest.getEventType());
     }
+
+    public AccountResponseDto transferBetweenAccount(AccountRequestDto accountRequest) {
+        String originAccountId = accountRequest.getOrigin();
+        String destAccountId = accountRequest.getDestination();
+
+        Optional<AccountEntity> originAccountGetQuery = accountRepository.getAccountById(originAccountId);
+        Optional<AccountEntity> destAccountGetQuery = accountRepository.getAccountById(destAccountId);
+
+        if(originAccountGetQuery.isPresent() && destAccountGetQuery.isPresent()) {
+            AccountEntity originAccountEntity = originAccountGetQuery.get();
+            AccountEntity destAccountEntity = destAccountGetQuery.get();
+
+            if(originAccountEntity.getBalance() < accountRequest.getAmount()) {
+                throw new AccountWithLowerBalanceException();
+            }
+            originAccountEntity.setBalance(originAccountEntity.getBalance() - accountRequest.getAmount());
+            originAccountEntity.setBalance(destAccountEntity.getBalance() + accountRequest.getAmount());
+            accountRepository.putAccount(originAccountEntity);
+            accountRepository.putAccount(destAccountEntity);
+            return AccountMapper.toResponseDto(originAccountEntity, destAccountEntity);
+        }else{
+            throw new AccountNotFoundException();
+        }
+    }
 }

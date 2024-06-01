@@ -11,17 +11,9 @@ public class AccountResponseDto {
 
     public AccountResponseDto() {}
 
-    public AccountResponseDto(AccountDto accountDto, AccountEventType eventType) {
-
-        if(eventType == AccountEventType.DEPOSIT) {
-            this.destination = accountDto;
-            this.origin = null;
-        }
-
-        if(eventType == AccountEventType.WITHDRAW) {
-            this.destination = null;
-            this.origin = accountDto;
-        }
+    public AccountResponseDto(AccountDto origin, AccountDto destination) {
+        this.origin = origin;
+        this.destination = destination;
     }
 
     public AccountDto getDestination() {
@@ -30,5 +22,13 @@ public class AccountResponseDto {
 
     public AccountDto getOrigin() {
         return origin;
+    }
+
+    public void setDestination(AccountDto destination) {
+        this.destination = destination;
+    }
+
+    public void setOrigin(AccountDto origin) {
+        this.origin = origin;
     }
 }
