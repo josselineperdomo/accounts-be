@@ -18,6 +18,13 @@ public class AccountRequestDto {
 
     public AccountRequestDto() {}
 
+    public AccountRequestDto(AccountEventType eventType, Float amount, String origin, String destination) {
+        this.eventType = eventType;
+        this.amount = amount;
+        this.destination = destination;
+        this.origin = origin;
+    }
+
     public AccountRequestDto(AccountEventType type, Float amount, String accountId) {
         this.eventType = type;
         this.amount = amount;

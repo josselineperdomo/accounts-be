@@ -74,7 +74,7 @@ public class AccountService {
                 throw new AccountWithLowerBalanceException();
             }
             originAccountEntity.setBalance(originAccountEntity.getBalance() - accountRequest.getAmount());
-            originAccountEntity.setBalance(destAccountEntity.getBalance() + accountRequest.getAmount());
+            destAccountEntity.setBalance(destAccountEntity.getBalance() + accountRequest.getAmount());
             accountRepository.putAccount(originAccountEntity);
             accountRepository.putAccount(destAccountEntity);
             return AccountMapper.toResponseDto(originAccountEntity, destAccountEntity);
